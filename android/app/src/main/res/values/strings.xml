@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="save">Simpan</string>
+    <string name="lingkar_dada_cm">Lingkar Dada: %1$s cm</string>
+    <string name="panjang_badan_cm">Panjang Badan: %1$s cm</string>
+    <string name="prediksi_bobot_kg">Prediksi Bobot: %1$skg</string>
+</resources>
