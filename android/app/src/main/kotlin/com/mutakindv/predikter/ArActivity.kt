@@ -14,7 +14,9 @@ import com.google.ar.core.Config
 import com.google.ar.core.Session
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.FrameTime
+import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.Scene
+import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.Color
 import com.google.ar.sceneform.rendering.Material
@@ -22,9 +24,11 @@ import com.google.ar.sceneform.rendering.MaterialFactory
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.PlaneRenderer
 import com.google.ar.sceneform.rendering.ShapeFactory
+import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import java.util.Objects
+import java.util.concurrent.CompletableFuture
 import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -33,6 +37,7 @@ import kotlin.math.sqrt
 class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
 
+    private var lineRenderable: ModelRenderable? = null
     private var arFragment: ArFragment? = null
     private lateinit var tvChestSize: TextView
     private lateinit var tvBodyLength: TextView
@@ -99,14 +104,12 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
         mSession = Session(this)
 
         val config = Config(mSession)
-        config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
+        config.planeFindingMode = Config.PlaneFindingMode.VERTICAL
         config.lightEstimationMode = Config.LightEstimationMode.DISABLED
         config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-        config.focusMode = Config.FocusMode.AUTO
         mSession?.configure(config)
         arFragment?.arSceneView?.setupSession(mSession)
         arFragment!!.arSceneView.scene.addOnUpdateListener(this)
-
 
         initModel()
 
@@ -168,7 +171,6 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
 
-
     private fun initModel() {
 
         MaterialFactory.makeOpaqueWithColor(this, Color(android.graphics.Color.GREEN))
@@ -227,9 +229,16 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     override fun onUpdate(frameTime: FrameTime) {
-        val planeRenderer = arFragment!!.arSceneView.planeRenderer
-        val planeMaterial = planeRenderer.material.join()
-        planeMaterial?.setFloat(PlaneRenderer.MATERIAL_SPOTLIGHT_RADIUS, Float.MAX_VALUE)
+
+        // Set plane texture
+        arFragment?.arSceneView
+            ?.planeRenderer
+            ?.material
+            ?.thenAccept { material ->
+
+                material.setFloat(PlaneRenderer.MATERIAL_SPOTLIGHT_RADIUS, 1000f)
+                // material.setFloat2(PlaneRenderer.MATERIAL_UV_SCALE, 50f, 50f);
+            }
         if (nodeA != null && nodeB != null && nodeC != null && nodeD != null) {
 
             val positionA = nodeA!!.worldPosition
@@ -264,8 +273,8 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
                  getString(R.string.panjang_badan_cm, distance2Formatted)
 
 
-            if(chestSize != null && bodyLength != null) {
-                bodyWeight = ( (  chestSize!!.pow(2.0)  * bodyLength!! ) / 10840)
+            if (chestSize != null && bodyLength != null) {
+                bodyWeight = ((chestSize!!.pow(2.0) * bodyLength!!) / 10840)
                 val weightFormatted = String.format("%.2f", bodyWeight)
                 tvWeight.text = getString(R.string.prediksi_bobot_kg, weightFormatted)
 
@@ -273,7 +282,36 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
         }
     }
 
+    fun lineBetweenPoints(point1: Vector3?, point2: Vector3?, anchorNode: AnchorNode) {
+        val lineNode = Node()
 
+        /* First, find the vector extending between the two points and define a look rotation in terms of this
+        Vector. */
+        val difference = Vector3.subtract(point1, point2)
+        val directionFromTopToBottom = difference.normalized()
+        val rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up())
+
+        /* Then, create a rectangular prism, using ShapeFactory.makeCube() and use the difference vector
+         to extend to the necessary length.  */
+
+        MaterialFactory.makeOpaqueWithColor(
+            this,
+            Color(android.graphics.Color.WHITE)
+        )
+            .thenAccept { material: Material? ->
+                lineRenderable = ShapeFactory.makeCube(
+                    Vector3(.01f, .01f, difference.length()),
+                    Vector3.zero(), material
+                )
+            }
+
+        /* Last, set the local rotation of the node to the rotation calculated earlier and set the local position to
+          the midpoint between the given points . */
+        lineNode.setParent(anchorNode)
+        lineNode.renderable = lineRenderable
+        lineNode.localPosition = Vector3.add(point1, point2).scaled(.5f)
+        lineNode.localRotation = rotationFromAToB
+    }
     companion object {
         private const val MIN_OPENGL_VERSION = 3.0
     }

@@ -30,15 +30,19 @@ class DetailPage extends StatelessWidget {
                 "Hasil Prediksi Bobot\n& Harga",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 16.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey,
-                    image: const DecorationImage(
-                        image: AssetImage("assetName"), fit: BoxFit.cover),
+              const SizedBox(height: 16),
+              Visibility(
+                visible: false,
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 16.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey,
+                      image: const DecorationImage(
+                          image: AssetImage("assetName"), fit: BoxFit.cover),
+                    ),
                   ),
                 ),
               ),
@@ -88,7 +92,7 @@ class DetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        NumberFormat.simpleCurrency()
+                        NumberFormat.compactCurrency()
                             .format(priceEstimationResult),
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 24),

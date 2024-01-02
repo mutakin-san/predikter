@@ -28,6 +28,7 @@ class PredikterApp extends StatelessWidget {
       create: (ctx) => HistoryProvider(),
       child: MaterialApp(
         title: 'Predikter',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: primaryColor,
