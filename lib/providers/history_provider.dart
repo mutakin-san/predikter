@@ -16,7 +16,6 @@ class HistoryProvider extends ChangeNotifier {
   List<History> get histories => _histories ?? [];
 
   Future<void> save(History history) async {
-    debugPrint("Method Save called");
     await historyRepository.insert(history);
     getHistories();
   }

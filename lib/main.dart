@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:predikter/pages/main_pages.dart';
+import 'package:predikter/providers/main_provider.dart';
 import 'package:predikter/utils/themes.dart';
 import 'package:provider/provider.dart';
 
@@ -24,8 +25,15 @@ class PredikterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (ctx) => HistoryProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (ctx) => HistoryProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => MainProvider(),
+        )
+      ],
       child: MaterialApp(
         title: 'Predikter',
         debugShowCheckedModeBanner: false,

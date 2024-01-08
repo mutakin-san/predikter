@@ -24,11 +24,11 @@ import com.google.ar.sceneform.rendering.MaterialFactory
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.PlaneRenderer
 import com.google.ar.sceneform.rendering.ShapeFactory
-import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import java.text.NumberFormat
+import java.util.Locale
 import java.util.Objects
-import java.util.concurrent.CompletableFuture
 import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -42,6 +42,7 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
     private lateinit var tvChestSize: TextView
     private lateinit var tvBodyLength: TextView
     private lateinit var tvWeight: TextView
+    private lateinit var tvPrice: TextView
     private lateinit var btnSave: FloatingActionButton
 
 
@@ -85,6 +86,7 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
         tvChestSize = findViewById(R.id.tvChestSize)
         tvBodyLength = findViewById(R.id.tvBodyLength)
         tvWeight = findViewById(R.id.tvWeight)
+        tvPrice = findViewById(R.id.tvPrice)
         btnSave = findViewById(R.id.btnSave)
 
 
@@ -97,7 +99,7 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
                 setResult(Activity.RESULT_OK, data)
                 finish()
             } else {
-                Toast.makeText(this, "Body Measurement is not finished yet", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Pengukuran belum selesai, silahkan tentukan ukuran lingkar dada dan panjang badan sapi dengan benar", Toast.LENGTH_SHORT)
                     .show()
             }
         }
@@ -239,46 +241,49 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
                 material.setFloat(PlaneRenderer.MATERIAL_SPOTLIGHT_RADIUS, 1000f)
                 // material.setFloat2(PlaneRenderer.MATERIAL_UV_SCALE, 50f, 50f);
             }
-        if (nodeA != null && nodeB != null && nodeC != null && nodeD != null) {
+
+        if (nodeA != null && nodeB != null) {
 
             val positionA = nodeA!!.worldPosition
             val positionB = nodeB!!.worldPosition
-
-            val positionC = nodeC!!.worldPosition
-            val positionD = nodeD!!.worldPosition
 
             val dx = positionA.x - positionB.x
             val dy = positionA.y - positionB.y
             val dz = positionA.z - positionB.z
 
+            val chestGirth = sqrt((dx * dx + dy * dy + dz * dz).toDouble())
+            chestSize = (PI * (chestGirth * 100))
+            val distanceFormatted = String.format("%.2f", chestSize)
+            tvChestSize.text =
+                getString(R.string.lingkar_dada_cm, distanceFormatted)
+
+        }
+
+        if(nodeC != null && nodeD != null) {
+
+            val positionC = nodeC!!.worldPosition
+            val positionD = nodeD!!.worldPosition
+
             val dx2 = positionC.x - positionD.x
             val dy2 = positionC.y - positionD.y
             val dz2 = positionC.z - positionD.z
-
-            //Computing a straight-line distance.
-            val distanceMeters = sqrt((dx * dx + dy * dy + dz * dz).toDouble())
-            val distance2Meters =
+            val bdLength =
                 sqrt((dx2 * dx2 + dy2 * dy2 + dz2 * dz2).toDouble())
-
-
-            chestSize = (PI * (distanceMeters * 100))
-            bodyLength = distance2Meters * 100
-
-            val distanceFormatted = String.format("%.2f", chestSize)
+            bodyLength = bdLength * 100
             val distance2Formatted = String.format("%.2f", bodyLength)
+            tvBodyLength.text =
+                getString(R.string.panjang_badan_cm, distance2Formatted)
+        }
 
-            tvChestSize.text =
-                getString(R.string.lingkar_dada_cm, distanceFormatted)
-             tvBodyLength.text =
-                 getString(R.string.panjang_badan_cm, distance2Formatted)
-
-
-            if (chestSize != null && bodyLength != null) {
-                bodyWeight = ((chestSize!!.pow(2.0) * bodyLength!!) / 10840)
-                val weightFormatted = String.format("%.2f", bodyWeight)
-                tvWeight.text = getString(R.string.prediksi_bobot_kg, weightFormatted)
-
-            }
+        if (chestSize != null && bodyLength != null) {
+            // Rumus penghitung bobot badan sapi menggunakan Winter Indonesia
+            bodyWeight = ((chestSize!!.pow(2.0) * bodyLength!!) / 10815.15)
+            val pricePerKg = intent.getIntExtra("pricePerKg", 0)
+            val priceEstimation = (bodyWeight ?: 0.0) * pricePerKg
+            val weightFormatted = String.format("%.2f", bodyWeight)
+            val numFormatter = NumberFormat.getNumberInstance()
+            tvWeight.text = getString(R.string.prediksi_bobot_kg, weightFormatted)
+            tvPrice.text = getString(R.string.prediksi_harga_jual, numFormatter.format(priceEstimation))
         }
     }
 

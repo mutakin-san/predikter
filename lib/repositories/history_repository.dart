@@ -1,3 +1,4 @@
+// ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -7,8 +8,11 @@ const tableHistory = "histories";
 const historyId = "id";
 const historyDate = "date";
 const historyBodyLength = "bodyLength";
-const historyWaist = "waist";
+const historyChestGirth = "chestGirth";
 const historyWeightEstimation = "weightEstimation";
+const historyPricePerKg = "pricePerKg";
+const historyCarcassPercentage = "carcassPercentage";
+const historyCowType = "cowType";
 const historyPriceEstimation = "priceEstimation";
 
 class HistoryRepository {
@@ -33,8 +37,11 @@ class HistoryRepository {
           $historyId integer primary key autoincrement, 
           $historyDate datetime not null,
           $historyBodyLength double not null,
-          $historyWaist double not null,
+          $historyChestGirth double not null,
           $historyWeightEstimation double not null,
+          $historyPricePerKg double not null,
+          $historyCarcassPercentage double not null,
+          $historyCowType text not null,
           $historyPriceEstimation double not null
           )
       ''');
@@ -44,7 +51,10 @@ class HistoryRepository {
   Future<List<History>> getHistories() async {
     final List<Map<String, dynamic>> results = await db.query(tableHistory);
 
-    return results.map((history) => History.fromMap(history)).toList();
+    final histories =
+        results.map((history) => History.fromMap(history)).toList();
+    histories.sort((a, b) => b.date.compareTo(a.date));
+    return histories;
   }
 
   Future<History> insert(History history) async {
@@ -55,14 +65,6 @@ class HistoryRepository {
 
   Future<History?> getHistory(int id) async {
     List<Map<String, dynamic>> maps = await db.query(tableHistory,
-        columns: [
-          historyId,
-          historyDate,
-          historyBodyLength,
-          historyWaist,
-          historyPriceEstimation,
-          historyWeightEstimation,
-        ],
         where: '$historyId = ?',
         whereArgs: [id]);
 

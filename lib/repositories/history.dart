@@ -1,20 +1,28 @@
 import 'dart:convert';
 
+import 'package:predikter/utils/dialog_helper.dart';
+
 class History {
   final int? id;
   final DateTime date;
   final double weightEstimation;
+  final int pricePerKg;
+  final double carcassPercentage;
+  final CowType cowType;
   final double priceEstimation;
   final double bodyLength;
-  final double waist;
+  final double chestGirth;
 
   History({
     this.id,
     required this.date,
     required this.weightEstimation,
+    required this.pricePerKg,
+    required this.carcassPercentage,
+    required this.cowType,
     required this.priceEstimation,
     required this.bodyLength,
-    required this.waist,
+    required this.chestGirth,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,9 +30,12 @@ class History {
       "id": id,
       "date": date.toUtc().toIso8601String(),
       "weightEstimation": weightEstimation,
+      "pricePerKg": pricePerKg,
+      "carcassPercentage": carcassPercentage,
+      "cowType": cowType.name,
       "priceEstimation": priceEstimation,
       "bodyLength": bodyLength,
-      "waist": waist,
+      "chestGirth": chestGirth,
     };
   }
 
@@ -33,9 +44,12 @@ class History {
       id: map["id"]?.toInt(),
       date: DateTime.parse(map["date"]).toLocal(),
       weightEstimation: map["weightEstimation"]?.toDouble(),
+      pricePerKg: map["pricePerKg"]?.toInt(),
+      carcassPercentage: map["carcassPercentage"]?.toDouble(),
+      cowType: CowType.values.firstWhere((element) => element.name == map["cowType"]),
       priceEstimation: map["priceEstimation"]?.toDouble(),
       bodyLength: map["bodyLength"]?.toDouble(),
-      waist: map["waist"]?.toDouble(),
+      chestGirth: map["chestGirth"]?.toDouble(),
     );
   }
 
@@ -48,17 +62,23 @@ class History {
     int? id,
     DateTime? date,
     double? weightEstimation,
+    int? pricePerKg,
+    double? carcassPercentage,
+    CowType? cowType,
     double? priceEstimation,
     double? bodyLength,
-    double? waist,
+    double? chestGirth,
   }) {
     return History(
       id: id ?? this.id,
       date: date ?? this.date,
       weightEstimation: weightEstimation ?? this.weightEstimation,
+      pricePerKg: pricePerKg ?? this.pricePerKg,
+      carcassPercentage: carcassPercentage ?? this.carcassPercentage,
+      cowType: cowType ?? this.cowType,
       priceEstimation: priceEstimation ?? this.priceEstimation,
       bodyLength: bodyLength ?? this.bodyLength,
-      waist: waist ?? this.waist,
+      chestGirth: chestGirth ?? this.chestGirth,
     );
   }
 }

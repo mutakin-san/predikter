@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:predikter/utils/dialog_helper.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../utils/constant.dart';
 
 class AppBarWidget extends AppBar {
   AppBarWidget(BuildContext mContext, {super.key, required this.titleText})
@@ -27,11 +25,7 @@ class AppBarWidget extends AppBar {
           onPressed: () {
             showPricePreferenceDialog(
               context,
-              title: "Pengaturan Harga",
-              onSave: (price) async {
-                final pref = await SharedPreferences.getInstance();
-                return await pref.setInt(PRICE_PREFERENCE_KEY, price ?? 0);
-              },
+              title: "Pengaturan Parameter Pengukuran",
             );
           },
           icon: const Icon(Icons.settings),

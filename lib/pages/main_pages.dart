@@ -2,9 +2,11 @@ import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:predikter/pages/detail_page.dart';
 import 'package:predikter/pages/history_page.dart';
 import 'package:predikter/pages/home_page.dart';
 import 'package:predikter/providers/history_provider.dart';
+import 'package:predikter/providers/main_provider.dart';
 import 'package:predikter/repositories/history.dart';
 import 'package:predikter/utils/constant.dart';
 import 'package:predikter/utils/themes.dart';
@@ -28,23 +30,42 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> _didTapButton() async {
     var status = await Permission.camera.status;
-    if (await ArCoreController.checkArCoreAvailability()) {
-      if (await ArCoreController.checkIsArCoreInstalled()) {
-        if (!status.isGranted) {
-          status = await Permission.camera.request();
-        } else {
-          final result = await platform.invokeMethod("moveToArPage");
-
-          debugPrint("Data From AR : $result");
-          if (result != null) {
-            saveHistory(
-              chestSize: result['chestSize'],
-              bodyLength: result['bodyLength'],
-              bodyWeight: result['bodyWeight'],
-            );
-          }
+    if (await ArCoreController.checkArCoreAvailability() &&
+        await ArCoreController.checkIsArCoreInstalled()) {
+      if (!status.isGranted) {
+        status = await Permission.camera.request();
+        if (status.isGranted) {
+          await moveToArPage();
         }
+      } else {
+        await moveToArPage();
       }
+    }
+  }
+
+  Future<void> moveToArPage() async {
+    final navigator = Navigator.of(context);
+    final prefs = await SharedPreferences.getInstance();
+    final pricePreference = prefs.getInt(PRICE_PREFERENCE_KEY);
+    if (pricePreference == null || pricePreference == 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Silahkan atur harga daging terlebih dahulu")));
+        return;
+      }
+    }
+    final result = await platform.invokeMethod("moveToArPage", pricePreference);
+
+    debugPrint("Data From AR : $result");
+    if (result != null) {
+      final history = await saveHistory(
+        chestSize: result['chestSize'],
+        bodyLength: result['bodyLength'],
+        bodyWeight: result['bodyWeight'],
+      );
+      navigator.push(MaterialPageRoute(
+        builder: (context) => DetailPage(history: history),
+      ));
     }
   }
 
@@ -61,15 +82,19 @@ class _MainPageState extends State<MainPage> {
     required double bodyWeight,
   }) async {
     final historyProvider = context.read<HistoryProvider>();
-    final prefs = await SharedPreferences.getInstance();
-    final pricePreference = prefs.getInt(PRICE_PREFERENCE_KEY);
-    final priceEstimation = bodyWeight * (pricePreference ?? 1);
+    final mainProvider = context.read<MainProvider>();
+    await mainProvider.getPreferences();
+
+    final priceEstimation = bodyWeight * (mainProvider.pricePerKg);
     final history = History(
         date: DateTime.now(),
         weightEstimation: bodyWeight,
+        pricePerKg: mainProvider.pricePerKg,
+        carcassPercentage: mainProvider.carcassPercentage,
+        cowType: mainProvider.cowType,
         priceEstimation: priceEstimation,
         bodyLength: bodyLength,
-        waist: chestSize);
+        chestGirth: chestSize);
 
     historyProvider.save(history);
     return history;
@@ -110,20 +135,7 @@ class _MainPageState extends State<MainPage> {
           shape: const CircleBorder(),
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          onPressed: () {
-            // final history = History(
-            //     bodyLength: 150,
-            //     waist: 69,
-            //     weightEstimation: 458,
-            //     priceEstimation: 17.4,
-            //     date: DateTime.now());
-
-            // context.read<HistoryProvider>().save(history);
-
-            _didTapButton();
-            // Navigator.push(
-            //     context, MaterialPageRoute(builder: (ctx) => const ARPage()));
-          },
+          onPressed: _didTapButton,
           child: const Icon(Icons.camera_alt)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavigationWidget(

@@ -4,4 +4,5 @@
     <string name="lingkar_dada_cm">Lingkar Dada: %1$s cm</string>
     <string name="panjang_badan_cm">Panjang Badan: %1$s cm</string>
     <string name="prediksi_bobot_kg">Prediksi Bobot: %1$skg</string>
+    <string name="prediksi_harga_jual">Prediksi Harga Jual: %1$s</string>
 </resources>
