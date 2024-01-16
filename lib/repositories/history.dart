@@ -9,6 +9,7 @@ class History {
   final int pricePerKg;
   final double carcassPercentage;
   final CowType cowType;
+  final String imagePath;
   final double priceEstimation;
   final double bodyLength;
   final double chestGirth;
@@ -20,6 +21,7 @@ class History {
     required this.pricePerKg,
     required this.carcassPercentage,
     required this.cowType,
+    required this.imagePath,
     required this.priceEstimation,
     required this.bodyLength,
     required this.chestGirth,
@@ -33,6 +35,7 @@ class History {
       "pricePerKg": pricePerKg,
       "carcassPercentage": carcassPercentage,
       "cowType": cowType.name,
+      "imagePath": imagePath,
       "priceEstimation": priceEstimation,
       "bodyLength": bodyLength,
       "chestGirth": chestGirth,
@@ -46,14 +49,14 @@ class History {
       weightEstimation: map["weightEstimation"]?.toDouble(),
       pricePerKg: map["pricePerKg"]?.toInt(),
       carcassPercentage: map["carcassPercentage"]?.toDouble(),
-      cowType: CowType.values.firstWhere((element) => element.name == map["cowType"]),
+      cowType: CowType.values
+          .firstWhere((element) => element.name == map["cowType"]),
+      imagePath: map["imagePath"].toString(),
       priceEstimation: map["priceEstimation"]?.toDouble(),
       bodyLength: map["bodyLength"]?.toDouble(),
       chestGirth: map["chestGirth"]?.toDouble(),
     );
   }
-
-  String toJson() => json.encode(toMap());
 
   factory History.fromJson(String source) =>
       History.fromMap(json.decode(source));
@@ -65,6 +68,7 @@ class History {
     int? pricePerKg,
     double? carcassPercentage,
     CowType? cowType,
+    String? imagePath,
     double? priceEstimation,
     double? bodyLength,
     double? chestGirth,
@@ -79,6 +83,7 @@ class History {
       priceEstimation: priceEstimation ?? this.priceEstimation,
       bodyLength: bodyLength ?? this.bodyLength,
       chestGirth: chestGirth ?? this.chestGirth,
+      imagePath: imagePath ?? this.imagePath,
     );
   }
 }

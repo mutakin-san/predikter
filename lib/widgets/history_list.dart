@@ -49,7 +49,8 @@ class HistoryList extends StatelessWidget {
                   date: history.date,
                   weightEstimationResult: history.weightEstimation,
                   priceEstimationResult: history.priceEstimation,
-                  waist: history.chestGirth,
+                  chestGirth: history.chestGirth,
+                  imagePath: history.imagePath,
                   bodyLength: history.bodyLength,
                   onClick: () {
                     Navigator.push(

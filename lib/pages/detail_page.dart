@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:predikter/repositories/history.dart';
@@ -27,16 +29,17 @@ class DetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Visibility(
-                visible: false,
+                visible: true,
                 child: AspectRatio(
-                  aspectRatio: 16 / 9,
+                  aspectRatio: 4 / 3,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 16.0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Colors.grey,
-                      image: const DecorationImage(
-                          image: AssetImage("assetName"), fit: BoxFit.cover),
+                      image: DecorationImage(
+                          image: FileImage(File(history.imagePath)),
+                          fit: BoxFit.cover),
                     ),
                   ),
                 ),
@@ -142,22 +145,9 @@ class DetailPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 24)
                 ],
               ),
-              // Container(
-              //   width: double.infinity,
-              //   padding:
-              //       const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-              //   child: ElevatedButton.icon(
-              //     icon: const Icon(Icons.home),
-              //     style:
-              //         ElevatedButton.styleFrom(backgroundColor: primaryColor),
-              //     label: const Text("Kembali Ke Halaman Utama"),
-              //     onPressed: () {
-              //       Navigator.pop(context);
-              //     },
-              //   ),
-              // )
             ],
           ),
         ),

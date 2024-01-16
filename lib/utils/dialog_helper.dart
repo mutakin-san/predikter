@@ -99,7 +99,7 @@ void showPricePreferenceDialog(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Harga daging perkilo",
+                        "Preferensi harga perkilo daging sapi",
                         style: GoogleFonts.roboto(),
                       ),
                       const SizedBox(height: 8),
@@ -108,13 +108,21 @@ void showPricePreferenceDialog(
                         maxLines: 1,
                         keyboardType: const TextInputType.numberWithOptions(),
                         style: const TextStyle(fontWeight: FontWeight.bold),
-                        decoration: const InputDecoration(
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           prefixText: "Rp ",
                           hintText: 'Harga daging per kg',
-                          border: OutlineInputBorder(),
-                          focusedBorder: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(width: 2, color: primaryColor),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(width: 2, color: primaryColor),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -127,6 +135,7 @@ void showPricePreferenceDialog(
                         builder: (context, setState) => DropdownButton(
                           padding: const EdgeInsets.all(8),
                           isExpanded: true,
+                          focusColor: primaryColor,
                           items: const [
                             DropdownMenuItem(
                                 value: CowType.bali, child: Text("Sapi Bali")),

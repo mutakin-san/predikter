@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:predikter/utils/dialog_helper.dart';
 
-
 class AppBarWidget extends AppBar {
   AppBarWidget(BuildContext mContext, {super.key, required this.titleText})
       : context = mContext;

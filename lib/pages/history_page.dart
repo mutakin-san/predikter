@@ -1,8 +1,12 @@
+import 'dart:io';
+
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
-import 'package:predikter/providers/history_provider.dart';
 import 'package:predikter/utils/dialog_helper.dart';
 import 'package:predikter/widgets/history_list.dart';
 import 'package:provider/provider.dart';
+
+import '../providers/history_provider.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
@@ -27,8 +31,16 @@ class HistoryPage extends StatelessWidget {
                   onTap: () {
                     showDeleteConfirmationDialog(context,
                         title: "Apakah kamu yakin akan menghapus semua data?",
-                        positifCallback: () {
+                        positifCallback: () async {
                       context.read<HistoryProvider>().deleteAll();
+                      var path =
+                          await ExternalPath.getExternalStoragePublicDirectory(
+                              ExternalPath.DIRECTORY_PICTURES);
+
+                      var dir = Directory(path);
+                      dir.listSync(recursive: true).forEach((element) {
+                        element.deleteSync(recursive: true);
+                      });
                     });
                   },
                   child: const Row(

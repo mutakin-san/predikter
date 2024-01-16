@@ -7,10 +7,18 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+
+    <!-- Inside the <manifest> tag, below the existing Camera permission -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
     <application
         android:label="predikter"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
 
         <activity
             android:name=".ArActivity"
@@ -47,6 +55,9 @@
             android:value="2" />
 
         <meta-data android:name="com.google.ar.core" tools:replace="android:value" android:value="required" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
     </application>
 </manifest>

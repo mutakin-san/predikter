@@ -1,6 +1,7 @@
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:predikter/pages/detail_page.dart';
 import 'package:predikter/pages/history_page.dart';
@@ -59,10 +60,11 @@ class _MainPageState extends State<MainPage> {
     debugPrint("Data From AR : $result");
     if (result != null) {
       final history = await saveHistory(
-        chestSize: result['chestSize'],
-        bodyLength: result['bodyLength'],
-        bodyWeight: result['bodyWeight'],
-      );
+          imagePath: result['imagePath'],
+          chestSize: result['chestSize'],
+          bodyLength: result['bodyLength'],
+          bodyWeight: result['bodyWeight'],
+          priceEstimation: result['priceEstimation']);
       navigator.push(MaterialPageRoute(
         builder: (context) => DetailPage(history: history),
       ));
@@ -77,24 +79,28 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<History> saveHistory({
+    required String imagePath,
     required double chestSize,
     required double bodyLength,
     required double bodyWeight,
+    required double priceEstimation,
   }) async {
     final historyProvider = context.read<HistoryProvider>();
     final mainProvider = context.read<MainProvider>();
     await mainProvider.getPreferences();
 
-    final priceEstimation = bodyWeight * (mainProvider.pricePerKg);
+    // final priceEstimation = bodyWeight * (mainProvider.pricePerKg);
     final history = History(
-        date: DateTime.now(),
-        weightEstimation: bodyWeight,
-        pricePerKg: mainProvider.pricePerKg,
-        carcassPercentage: mainProvider.carcassPercentage,
-        cowType: mainProvider.cowType,
-        priceEstimation: priceEstimation,
-        bodyLength: bodyLength,
-        chestGirth: chestSize);
+      date: DateTime.now(),
+      weightEstimation: bodyWeight,
+      pricePerKg: mainProvider.pricePerKg,
+      carcassPercentage: mainProvider.carcassPercentage,
+      cowType: mainProvider.cowType,
+      imagePath: imagePath,
+      priceEstimation: priceEstimation,
+      bodyLength: bodyLength,
+      chestGirth: chestSize,
+    );
 
     historyProvider.save(history);
     return history;

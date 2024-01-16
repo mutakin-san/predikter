@@ -10,11 +10,11 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterFragmentActivity() {
     private var methodChannel: MethodChannel? = null
-    private lateinit var mResult: MethodChannel.Result
+    private var mResult: MethodChannel.Result? = null
     private val arLauncher = (this as ComponentActivity).registerForActivityResult(
         MyActivityForResultContract()
     ) { result ->
-        mResult.success(result)
+        mResult?.success(result)
     }
 
 
@@ -42,16 +42,17 @@ class MainActivity: FlutterFragmentActivity() {
 
 
 
-class MyActivityForResultContract : ActivityResultContract<Int, Map<String,Double?>>() {
+class MyActivityForResultContract : ActivityResultContract<Int, Map<String,Any?>>() {
     override fun createIntent(context: Context, input: Int): Intent {
         return Intent(context, ArActivity::class.java).apply {
             putExtra("pricePerKg", input)
         }
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): Map<String, Double?> {
+    override fun parseResult(resultCode: Int, intent: Intent?): Map<String, Any?> {
         return if (resultCode == FlutterFragmentActivity.RESULT_OK) {
             mapOf(
+                "imagePath" to intent?.getStringExtra("imagePath"),
                 "bodyLength" to intent?.getDoubleExtra("bodyLength", 0.0),
                 "chestSize" to intent?.getDoubleExtra("chestSize", 0.0),
                 "bodyWeight" to intent?.getDoubleExtra("bodyWeight", 0.0),

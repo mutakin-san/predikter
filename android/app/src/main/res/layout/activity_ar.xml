@@ -18,53 +18,80 @@
         android:orientation="vertical"
         android:layout_gravity="start">
 
-    <TextView
-        android:id="@+id/tvChestSize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        tools:text="350cm"
-        android:textColor="@android:color/white"
-        android:textSize="20sp" />
+        <TextView
+            android:id="@+id/tvChestSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="8dp"
+            android:fontFamily="@font/roboto_slab"
+            android:padding="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            tools:text="Lingkar Dada: 350cm" />
 
-    <TextView
-        android:id="@+id/tvBodyLength"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        tools:text="350cm"
-        android:textColor="@android:color/white"
-        android:textSize="20sp" />
+        <TextView
+            android:id="@+id/tvBodyLength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="8dp"
+            android:fontFamily="@font/roboto_slab"
+            android:padding="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            tools:text="Panjang Badan: 350cm" />
 
-    <TextView
-        android:id="@+id/tvWeight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        tools:text="540kg"
-        android:textColor="@android:color/white"
-        android:textSize="20sp" />
+        <TextView
+            android:id="@+id/tvWeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="8dp"
+            android:fontFamily="@font/roboto_slab"
+            android:padding="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            tools:text="Prediksi Bobot: 540kg" />
 
 
-    <TextView
-        android:id="@+id/tvPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        tools:text="12jt"
-        android:textColor="@android:color/white"
-        android:textSize="20sp" />
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="8dp"
+            android:fontFamily="@font/roboto_slab"
+            android:padding="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            tools:text="Harga Jual: 24jt" />
 
     </LinearLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_margin="24dp"
-            app:backgroundTint="#4F80E1"
-            app:srcCompat="@drawable/baseline_check_24"
-            android:contentDescription="@string/save" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_margin="24dp"
+        app:backgroundTint="#4F80E1"
+        app:srcCompat="@drawable/baseline_check_24"
+        android:contentDescription="@string/save" />
+
+    <Button
+        android:id="@+id/record_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:onClick="onClickRecord"
+        android:text="Rekam"
+        android:visibility="gone"
+        android:layout_gravity="top|right"
+        android:textColor="@android:color/holo_red_light" />
+
+    <ProgressBar
+        android:id="@+id/loadingIndicator"
+        android:progressTint="#4F80E1"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
 </FrameLayout>

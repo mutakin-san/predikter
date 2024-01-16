@@ -13,6 +13,7 @@ const historyWeightEstimation = "weightEstimation";
 const historyPricePerKg = "pricePerKg";
 const historyCarcassPercentage = "carcassPercentage";
 const historyCowType = "cowType";
+const historyImagePath = "imagePath";
 const historyPriceEstimation = "priceEstimation";
 
 class HistoryRepository {
@@ -42,6 +43,7 @@ class HistoryRepository {
           $historyPricePerKg double not null,
           $historyCarcassPercentage double not null,
           $historyCowType text not null,
+          $historyImagePath text not null,
           $historyPriceEstimation double not null
           )
       ''');

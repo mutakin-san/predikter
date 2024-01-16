@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:predikter/providers/history_provider.dart';
 import 'package:predikter/utils/dialog_helper.dart';
+import 'package:predikter/utils/external_file_helper.dart';
 import 'package:provider/provider.dart';
 
 class HistoryItemWidget extends StatelessWidget {
@@ -11,14 +12,16 @@ class HistoryItemWidget extends StatelessWidget {
       required this.date,
       required this.weightEstimationResult,
       required this.priceEstimationResult,
-      required this.waist,
+      required this.chestGirth,
+      required this.imagePath,
       required this.bodyLength,
       required this.onClick});
   final int id;
   final DateTime date;
   final double weightEstimationResult;
   final double priceEstimationResult;
-  final double waist;
+  final double chestGirth;
+  final String imagePath;
   final double bodyLength;
   final VoidCallback onClick;
 
@@ -44,6 +47,7 @@ class HistoryItemWidget extends StatelessWidget {
                       showDeleteConfirmationDialog(context,
                           title: "Apakah kamu yakin akan menghapus data ini?",
                           positifCallback: () {
+                        deleteFileFromExternalStorage(imagePath);
                         context.read<HistoryProvider>().delete(id);
                       });
                     },
@@ -105,7 +109,7 @@ class HistoryItemWidget extends StatelessWidget {
                             size: 16,
                           ),
                           Text(
-                            "${waist.toStringAsFixed(2)}cm",
+                            "${chestGirth.toStringAsFixed(2)}cm",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
