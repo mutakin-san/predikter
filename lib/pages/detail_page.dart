@@ -28,8 +28,39 @@ class DetailPage extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 16),
-              Visibility(
-                visible: true,
+              GestureDetector(
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (context) => Dialog.fullscreen(
+                    backgroundColor: Colors.black26,
+                    child: Stack(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.symmetric(vertical: 16.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey,
+                            image: DecorationImage(
+                                image: FileImage(File(history.imagePath)),
+                                fit: BoxFit.cover),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: IconButton(
+                                color: Colors.white,
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.close)),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
                 child: AspectRatio(
                   aspectRatio: 4 / 3,
                   child: Container(

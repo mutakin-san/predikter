@@ -60,17 +60,6 @@ import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-
-enum class AppState {
-    Idle,
-    Recording,
-    Playingback
-}
-
-
-// Tracks app's specific state changes.
-private var appState = AppState.Idle
-
 class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
 
@@ -107,10 +96,6 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
     private var anchorC: Anchor? = null
     private var anchorD: Anchor? = null
 
-
-    private var greenMaterial: Material? = null
-    private var blueMaterial: Material? = null
-    private var originalMaterial: Material? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -220,19 +205,11 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     private fun initModel() {
 
-        MaterialFactory.makeOpaqueWithColor(this, Color(android.graphics.Color.GREEN))
-            .thenAccept { material ->
-                greenMaterial = material
-            }
-        MaterialFactory.makeOpaqueWithColor(this, Color(android.graphics.Color.BLUE))
-            .thenAccept { material ->
-                blueMaterial = material
-            }
+
 
         MaterialFactory.makeOpaqueWithColor(this, Color(android.graphics.Color.RED))
             .thenAccept { material ->
                 redSphereRenderable = ShapeFactory.makeSphere(0.05f, Vector3.zero(), material)
-                originalMaterial = material
                 redSphereRenderable!!.isShadowCaster = false
                 redSphereRenderable!!.isShadowReceiver = false
             }
@@ -240,7 +217,6 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
         MaterialFactory.makeOpaqueWithColor(this, Color(android.graphics.Color.BLUE))
             .thenAccept { material ->
                 blueSphereRenderable = ShapeFactory.makeSphere(0.05f, Vector3.zero(), material)
-                blueMaterial = material
                 blueSphereRenderable!!.isShadowCaster = false
                 blueSphereRenderable!!.isShadowReceiver = false
             }
@@ -430,242 +406,6 @@ class ArActivity : AppCompatActivity(), Scene.OnUpdateListener {
             setResultDataAndFinish()
 
         }
-    }
-
-    // Update the "Record" button based on app's internal state.
-    private fun updateRecordButton() {
-        val buttonView = findViewById<View>(R.id.record_button)
-        val button = buttonView as Button
-
-        when (appState) {
-            AppState.Idle -> {
-                button.text = "Record"
-                button.visibility = View.VISIBLE
-            }
-
-            AppState.Recording -> {
-                button.text = "Stop"
-                button.visibility = View.VISIBLE
-            }
-
-            AppState.Playingback -> button.visibility = View.INVISIBLE
-        }
-    }
-
-
-    // Handle the "Record" button click event.
-    fun onClickRecord(view: View?) {
-        Log.d(TAG, "onClickRecord")
-        when (appState) {
-            AppState.Idle -> {
-                val hasStarted: Boolean = startRecording()
-                Log.d(
-                    TAG,
-                    String.format("onClickRecord start: hasStarted %b", hasStarted)
-                )
-                if (hasStarted) appState = AppState.Recording
-            }
-
-            AppState.Recording -> {
-                val hasStopped: Boolean = stopRecording()
-                Log.d(
-                    TAG,
-                    String.format("onClickRecord stop: hasStopped %b", hasStopped)
-                )
-                if (hasStopped) appState = AppState.Idle
-            }
-
-
-            else -> {}
-        }
-        updateRecordButton()
-    }
-
-
-    private val REQUEST_WRITE_EXTERNAL_STORAGE = 1
-    private fun checkAndRequestStoragePermission(): Boolean {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                REQUEST_WRITE_EXTERNAL_STORAGE
-            )
-            return false
-        }
-        return true
-    }
-
-
-    private val MP4_VIDEO_MIME_TYPE = "video/mp4"
-
-    private fun createMp4File(): Uri? {
-        // Since we use legacy external storage for Android 10,
-        // we still need to request for storage permission on Android 10.
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-            if (!checkAndRequestStoragePermission()) {
-                Log.i(
-                    TAG, String.format(
-                        "Didn't createMp4File. No storage permission, API Level = %d",
-                        Build.VERSION.SDK_INT
-                    )
-                )
-                return null
-            }
-        }
-
-        val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-        val mp4FileName = "arcore-" + dateFormat.format(Date()) + ".mp4"
-        val resolver = this.contentResolver
-        val videoCollection: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Video.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL_PRIMARY
-            )
-        } else {
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        }
-
-        // Create a new Media file record.
-        val newMp4FileDetails = ContentValues()
-        newMp4FileDetails.put(MediaStore.Video.Media.DISPLAY_NAME, mp4FileName)
-        newMp4FileDetails.put(MediaStore.Video.Media.MIME_TYPE, MP4_VIDEO_MIME_TYPE)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // The Relative_Path column is only available since API Level 29.
-            newMp4FileDetails.put(
-                MediaStore.Video.Media.RELATIVE_PATH,
-                Environment.DIRECTORY_MOVIES
-            )
-        } else {
-            // Use the Data column to set path for API Level <= 28.
-            val mp4FileDir =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-            val absoluteMp4FilePath = File(mp4FileDir, mp4FileName).absolutePath
-            newMp4FileDetails.put(MediaStore.Video.Media.DATA, absoluteMp4FilePath)
-        }
-        val newMp4FileUri = resolver.insert(videoCollection, newMp4FileDetails)
-
-        // Ensure that this file exists and can be written.
-        if (newMp4FileUri == null) {
-            Log.e(
-                TAG,
-                String.format(
-                    "Failed to insert Video entity in MediaStore. API Level = %d",
-                    Build.VERSION.SDK_INT
-                )
-            )
-            return null
-        }
-
-        // This call ensures the file exist before we pass it to the ARCore API.
-        if (!testFileWriteAccess(newMp4FileUri)) {
-            return null
-        }
-        Log.d(
-            TAG,
-            String.format(
-                "createMp4File = %s, API Level = %d",
-                newMp4FileUri,
-                Build.VERSION.SDK_INT
-            )
-        )
-        return newMp4FileUri
-    }
-
-    // Test if the file represented by the content Uri can be open with write access.
-    private fun testFileWriteAccess(contentUri: Uri): Boolean {
-        try {
-            this.contentResolver.openOutputStream(contentUri).use { mp4File ->
-                Log.d(
-                    TAG,
-                    String.format("Success in testFileWriteAccess %s", contentUri.toString())
-                )
-                return true
-            }
-        } catch (e: FileNotFoundException) {
-            Log.e(
-                TAG,
-                String.format(
-                    "FileNotFoundException in testFileWriteAccess %s",
-                    contentUri.toString()
-                ),
-                e
-            )
-        } catch (e: IOException) {
-            Log.e(
-                TAG,
-                String.format("IOException in testFileWriteAccess %s", contentUri.toString()),
-                e
-            )
-        }
-        return false
-    }
-
-    private fun startRecording(): Boolean {
-        val mp4FileUri: Uri = createMp4File() ?: return false
-        Log.d(TAG, "startRecording at: $mp4FileUri")
-        pauseARCoreSession()
-
-        // Configure the ARCore session to start recording.
-        val recordingConfig: RecordingConfig = RecordingConfig(mSession)
-            .setRecordingRotation(90)
-            .setMp4DatasetUri(mp4FileUri)
-            .setAutoStopOnPause(true)
-        try {
-            // Prepare the session for recording, but do not start recording yet.
-            mSession?.startRecording(recordingConfig)
-        } catch (e: RecordingFailedException) {
-            Log.e(TAG, "startRecording - Failed to prepare to start recording", e)
-            return false
-        }
-        val canResume: Boolean = resumeARCoreSession()
-        if (!canResume) return false
-
-        // Correctness checking: check the ARCore session's RecordingState.
-        val recordingStatus: RecordingStatus? = mSession?.recordingStatus
-        Log.d(
-            TAG,
-            java.lang.String.format("startRecording - recordingStatus %s", recordingStatus)
-        )
-        return recordingStatus === RecordingStatus.OK
-    }
-
-
-    private fun pauseARCoreSession() {
-        // Pause the GLSurfaceView so that it doesn't update the ARCore mSession?.
-        // Pause the ARCore session so that we can update its configuration.
-        // If the GLSurfaceView is not paused,
-        //   onDrawFrame() will try to update the ARCore session
-        //   while it's paused, resulting in a crash.
-        arFragment!!.arSceneView.pause()
-        mSession?.pause()
-    }
-
-    private fun resumeARCoreSession(): Boolean {
-        // We must resume the ARCore session before the GLSurfaceView.
-        // Otherwise, the GLSurfaceView will try to update the ARCore mSession?.
-        try {
-            mSession?.resume()
-        } catch (e: CameraNotAvailableException) {
-            Log.e(TAG, "CameraNotAvailableException in resumeARCoreSession", e)
-            return false
-        }
-        arFragment!!.arSceneView.resume()
-        return true
-    }
-
-    private fun stopRecording(): Boolean {
-        try {
-            mSession?.stopRecording()
-        } catch (e: RecordingFailedException) {
-            Log.e(TAG, "stopRecording - Failed to stop recording", e)
-            return false
-        }
-
-        // Correctness checking: check if the session stopped recording.
-        return mSession?.recordingStatus === RecordingStatus.NONE
     }
 
     companion object {
